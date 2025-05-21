@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>3D Model Viewer</title>
+    <style>
+        body { margin: 0; overflow: hidden; background: #333; }
+        canvas { width: 100%; height: 100vh; touch-action: none; }
+    </style>
+</head>
+<body>
+    <script type="importmap">
+        {
+            "imports": {
+                "three": "https://unpkg.com/three@0.153.0/build/three.module.js",
+                "three/addons/": "https://unpkg.com/three@0.153.0/examples/jsm/"
+            }
+        }
+    </script>
+    <script type="module">
+        import * as THREE from 'three';
+        import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+        import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
+
+        const scene = new THREE.Scene();
+        const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+        const renderer = new THREE.WebGLRenderer({ antialias: true });
+        renderer.setSize(window.innerWidth, window.innerHeight);
+        document.body.appendChild(renderer.domElement);
+
+        const loader = new GLTFLoader();
+        loader.load(
+            'https://raw.githubusercontent.com/josephjaneth/try-again/main/fuk%20Animated%20Walking%20Tshirt.glb',
+            (gltf) => {
+                const model = gltf.scene;
+                scene.add(model);
+                model.position.set(0, 0, 0);
+                model.scale.set(1, 1, 1);
+            },
+            undefined,
+            (error) => {
+                console.error('Error loading model:', error);
+                alert('Failed to load the model. Check console for details.');
+            }
+        );
+
+        camera.position.set(0, 1, 5);
+
+        const controls = new OrbitControls(camera, renderer.domElement);
+        controls.enablePan = false;
+        controls.enableZoom = false;
+        controls.enableRotate = true;
+        controls.minPolarAngle = Math.PI / 2;
+        controls.maxPolarAngle = Math.PI / 2;
+        controls.autoRotate = true;
+        controls.autoRotateSpeed = 2.0;
+
+        const ambientLight = new THREE.AmbientLight(0xffffff, 0.6);
+        scene.add(ambientLight);
+        const directionalLight = new THREE.DirectionalLight(0xffffff, 0.8);
+        directionalLight.position.set(5, 5, 5);
+        scene.add(directionalLight);
+
+        function animate() {
+            requestAnimationFrame(animate);
+            controls.update();
+            renderer.render(scene, camera);
+        }
+        animate();
+
+        window.addEventListener('resize', () => {
+            camera.aspect = window.innerWidth / window.innerHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(window.innerWidth, window.innerHeight);
+        });
+    </script>
+</body>
+</html>
